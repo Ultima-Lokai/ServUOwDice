@@ -1,0 +1,26 @@
+2/9/2015 10:01:57 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/9/2015 10:02:49 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd Data/weapondice.xml'
+2/9/2015 10:02:56 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'add dagger'
+2/9/2015 10:02:59 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') building at (3501, 2574, 14) in Trammel: "dagger"
+2/9/2015 10:02:59 PM: 192.168.1.122: Serials: 0x4000002A; 
+2/9/2015 10:03:03 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/9/2015 10:03:17 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/9/2015 10:04:44 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd Data/stupid.xml'
+2/9/2015 10:07:37 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/9/2015 10:07:54 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd data/weapondice.xml'
+2/10/2015 1:31:44 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/10/2015 1:31:52 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd '
+2/10/2015 1:32:08 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd Data/weapondice.xml'
+2/10/2015 1:32:19 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/10/2015 1:32:27 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'add katana'
+2/10/2015 1:32:29 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') building at (3500, 2575, 14) in Trammel: "katana"
+2/10/2015 1:32:29 PM: 192.168.1.122: Serials: 0x4000002C; 
+2/10/2015 1:32:30 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/10/2015 1:32:39 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'm remove'
+2/10/2015 1:32:41 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') deleting 0x4000002A (Dagger)
+2/10/2015 1:32:42 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') deleting 0x4000002C (Katana)
+2/10/2015 1:35:50 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
+2/10/2015 1:36:06 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd Data/weapondice.xml'
+2/10/2015 1:42:04 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd data/weapondice.xml'
+2/10/2015 1:49:03 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'loadwd data/weapondice.xml'
+2/10/2015 2:44:35 PM: 192.168.1.122: Owner 0x1 "Lokai" ('Lokai') used command 'props '
