@@ -134,7 +134,7 @@ namespace Server.Items
         private int m_MinDamage, m_MaxDamage;
 
         //DICE-DAMAGE Mod
-        private static int m_NumDice, m_DiceSides, m_Offset;
+        private static int m_DiceNum, m_DiceSides, m_DiceOffset;
         //DICE-DAMAGE Mod
 
 		private int m_HitSound, m_MissSound;
@@ -479,68 +479,110 @@ namespace Server.Items
 		public int MissSound { get { return (m_MissSound == -1 ? Core.AOS ? AosMissSound : OldMissSound : m_MissSound); } set { m_MissSound = value; } }
 
         //DICE-DAMAGE Mod
-        
+
         [CommandProperty(AccessLevel.GameMaster)]
-        public int Dice_Sides
+        public int Dice_Num
         {
             get
             {
                 try
                 {
-                    return LoadWeaponDefaults.GetDice(this.GetType()).getSides;
+                    return WeaponDiceDefaults.GetDice(this.GetType()).getNum;
                 }
                 catch
                 {
-                    return (m_DiceSides <= 0 ? DiceSides : m_DiceSides);
+                    if (m_DiceNum == 0)
+                        return (1);
+                    return m_DiceNum;
                 }
             }
-            set { m_DiceSides = value; InvalidateProperties(); }
-        }
-
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int Dice_Offset
-        {
-            get
+            set
             {
                 try
                 {
-                    return LoadWeaponDefaults.GetDice(this.GetType()).getOffset;
+                    WeaponDiceDefaults.ReplaceDice(this.GetType(), value, Dice_Sides, Dice_Offset);
+                    InvalidateProperties();
                 }
                 catch
                 {
-                    return (m_Offset < 0 ? Offset : m_Offset);
+                    m_DiceNum = value;
+                    InvalidateProperties();
                 }
             }
-            set { m_Offset = value; InvalidateProperties(); }
         }
 
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int Dice_Amount
-        {
-            get
-            {
-                try
-                {
-                    return LoadWeaponDefaults.GetDice(this.GetType()).getNum;
-                }
-                catch
-                {
-                    return (m_NumDice <= 0 ? NumDice : m_NumDice);
-                }
-            }
-            set { m_NumDice = value; InvalidateProperties(); }
-        }
+	    [CommandProperty(AccessLevel.GameMaster)]
+	    public int Dice_Sides
+	    {
+	        get
+	        {
+	            try
+	            {
+	                return WeaponDiceDefaults.GetDice(this.GetType()).getSides;
+	            }
+	            catch
+	            {
+	                if (m_DiceSides == 0)
+	                    return (AosMaxDamage - AosMinDamage + 1);
+	                return m_DiceSides;
+	            }
+	        }
+	        set
+	        {
+	            try
+	            {
+	                WeaponDiceDefaults.ReplaceDice(this.GetType(), Dice_Num, value, Dice_Offset);
+	                InvalidateProperties();
+	            }
+	            catch
+	            {
+	                m_DiceSides = value;
+	                InvalidateProperties();
+	            }
+	        }
+	    }
 
-		[CommandProperty(AccessLevel.GameMaster)]
+	    [CommandProperty(AccessLevel.GameMaster)]
+	    public int Dice_Offset
+	    {
+	        get
+	        {
+	            try
+	            {
+	                return WeaponDiceDefaults.GetDice(this.GetType()).getOffset;
+	            }
+	            catch
+	            {
+	                if (m_DiceOffset == 0)
+	                    return (AosMinDamage - 1);
+	                return m_DiceOffset;
+	            }
+	        }
+	        set
+	        {
+	            try
+	            {
+	                WeaponDiceDefaults.ReplaceDice(this.GetType(), Dice_Num, Dice_Sides, value);
+	                InvalidateProperties();
+	            }
+	            catch
+	            {
+	                m_DiceOffset = value;
+	                InvalidateProperties();
+	            }
+	        }
+	    }
+
+	    [CommandProperty(AccessLevel.GameMaster)]
         public int MinDamage
         {
-            get { return (Dice_Amount + Dice_Offset); }
+            get { return (Dice_Num + Dice_Offset); }
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
         public int MaxDamage
         {
-            get { return (Dice_Amount * Dice_Sides + Dice_Offset); }
+            get { return (Dice_Num * Dice_Sides + Dice_Offset); }
 		}
         //DICE-DAMAGE Mod
 
@@ -2986,7 +3028,7 @@ namespace Server.Items
                 }
                 else
                 {
-                    damage = Utility.Dice(Dice_Amount, Dice_Sides, Dice_Offset);
+                    damage = Utility.Dice(Dice_Num, Dice_Sides, Dice_Offset);
                 }
 				return damage;
 			}
@@ -3426,12 +3468,10 @@ namespace Server.Items
 
             writer.Write(12); // version
 
-            //DICE-DAMAGE Mod
             // Version 12
-            writer.Write(m_Offset);
+            writer.Write(m_DiceNum);
             writer.Write(m_DiceSides);
-            writer.Write(m_NumDice);
-            //DICE-DAMAGE Mod
+            writer.Write(m_DiceOffset);
 
 			// Version 11
 			writer.Write(m_TimesImbued);
@@ -3755,15 +3795,14 @@ namespace Server.Items
 
 			switch (version)
             {
-                //DICE-DAMAGE Mod
                 case 12:
                     {
-                        m_Offset = reader.ReadInt();
+                        m_DiceNum = reader.ReadInt();
                         m_DiceSides = reader.ReadInt();
-                        m_NumDice = reader.ReadInt();
+                        m_DiceOffset = reader.ReadInt();
+
                         goto case 11;
                     }
-                //DICE-DAMAGE Mod
 				case 11:
 					{
 						m_TimesImbued = reader.ReadInt();
@@ -4317,9 +4356,9 @@ namespace Server.Items
             m_MaxDamage = -1;
 
             //DICE-DAMAGE Mod
-            m_NumDice = 0;
+            m_DiceNum = 0;
             m_DiceSides = 0;
-            m_Offset = -1;
+            m_DiceOffset = 0;
             //DICE-DAMAGE Mod
 
 			m_HitSound = -1;
@@ -4390,12 +4429,6 @@ namespace Server.Items
 				InvalidateProperties();
 			}
 		}
-
-        //DICE-DAMAGE Mod
-        public virtual int NumDice { get { return 0; } }
-        public virtual int DiceSides { get { return 0; } }
-        public virtual int Offset { get { return 0; } }
-        //DICE-DAMAGE Mod
 
 		public int GetElementalDamageHue()
 		{
