@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using OpenUO.Core;
 using Server.Commands;
 using Server.Items;
 
@@ -12,7 +12,7 @@ namespace Server
     public class WeaponDiceDefaults
     {
 		private static bool AUTO_LOAD_DEFAULTS = true; // Default dice values are loaded on Server startup.
-		private static bool AUTO_SAVE_DEFAULTS = false; // Default dice values are saved during World Save.
+		private static bool AUTO_SAVE_DEFAULTS = true; // Default dice values are saved during World Save.
 		private static string DEFAULT_DICE_XML = "Data/weapondice.xml";
 		
         public struct weaponDice
@@ -80,144 +80,190 @@ namespace Server
             }
         }
 
+        private static List<Type> baseTypes;
+
         public static void Initialize()
         {
-            CommandSystem.Register("LoadWD", AccessLevel.Administrator, Load_OnCommand);
-            CommandSystem.Register("SaveWD", AccessLevel.Administrator, Save_OnCommand);
-            LoadWeaponDice();
+            CommandSystem.Register("LoadWD", AccessLevel.Administrator, LoadDice_OnCommand);
+            CommandSystem.Register("SaveWD", AccessLevel.Administrator, SaveDice_OnCommand);
+            Console.WriteLine("Found {0} Base Types.", FindBaseTypes());
+            if (AUTO_LOAD_DEFAULTS) LoadRoutine(null, DEFAULT_DICE_XML);
 			EventSink.WorldSave += new WorldSaveEventHandler(SaveWeaponDice);
         }
 
-        [Usage("SaveWD <Filename>")]
-        [Description("Saves weapon defaults to the filename supplied.")]
-        private static void Save_OnCommand(CommandEventArgs e)
+        private static void SaveRoutine(Mobile from, string filename)
         {
-            Mobile from = e.Mobile;
-            string filename = "";
-            if (e.Mobile.AccessLevel >= AccessLevel.Administrator)
-            {
-                if (e.Arguments.Length >= 1)
-                {
-                    filename = e.Arguments[0];
-                }
-                else
-                {
-                    e.Mobile.SendMessage("Usage:  {0} <Filename>", e.Command);
-                    return;
-                }
+            bool save_ok = true;
+            FileStream fs = null;
 
-                bool save_ok = true;
-                FileStream fs = null;
+            try
+            {
+                // Create the FileStream to write with.
+                fs = new FileStream(filename, FileMode.Create);
+            }
+            catch
+            {
+                if (from != null)
+                {
+                    from.SendMessage("Error creating file {0}", filename);
+                }
+                save_ok = false;
+            }
+
+            int count = 0;
+            int countWeapons = 0;
+            int countNoDice = 0;
+
+            // so far so good
+            if (save_ok)
+            {
+                // Create the data set
+                DataSet ds = new DataSet("Weapons");
 
                 try
                 {
-                    // Create the FileStream to write with.
-                    fs = new FileStream(filename, FileMode.Create);
-                }
-                catch
-                {
-                    if (from != null)
+                    ds.Tables.Add("Values");
+                    ds.Tables["Values"].Columns.Add("Type");
+                    ds.Tables["Values"].Columns.Add("Num");
+                    ds.Tables["Values"].Columns.Add("Sides");
+                    ds.Tables["Values"].Columns.Add("Offset");
+                    foreach (Assembly assembly in ScriptCompiler.Assemblies)
                     {
-                        from.SendMessage("Error creating file {0}", filename);
-                    }
-                    save_ok = false;
-                }
-
-                int count = 0;
-                int countWeapons = 0;
-                int countNoDice = 0;
-
-                // so far so good
-                if (save_ok)
-                {
-                    // Create the data set
-                    DataSet ds = new DataSet("Weapons");
-
-                    try
-                    {
-                        ds.Tables.Add("Values");
-                        ds.Tables["Values"].Columns.Add("Type");
-                        ds.Tables["Values"].Columns.Add("Num");
-                        ds.Tables["Values"].Columns.Add("Sides");
-                        ds.Tables["Values"].Columns.Add("Offset");
-                        foreach (Assembly assembly in ScriptCompiler.Assemblies)
+                        foreach (Type type in assembly.GetTypes())
                         {
-                            foreach (Type type in assembly.GetTypes())
+                            // We do not save 'Base' types like BaseKnife, etc. but we save anything else that inherits from BaseWeapon
+                            if (!type.Name.Contains("Base") && InheritsFrom(type, typeof(BaseWeapon)))
                             {
-                                if (!type.Name.Contains("Base") && InheritsFrom(type, typeof (BaseWeapon)))
+                                countWeapons += 1;
+                                if (HasDice(type))
                                 {
-                                    countWeapons += 1;
-                                    if (HasDice(type))
-                                    {
-                                        DataRow dr = ds.Tables["Values"].NewRow();
-                                        dr["Type"] = type;
-                                        dr["Num"] = GetDice(type).getNum;
-                                        dr["Sides"] = GetDice(type).getSides;
-                                        dr["Offset"] = GetDice(type).getOffset;
-                                        ds.Tables["Values"].Rows.Add(dr);
-                                        count += 1;
-                                    }
-                                    else
-                                    {
-                                        countNoDice += 1;
-                                    }
+                                    // Create a new Data Row
+                                    DataRow dr = ds.Tables["Values"].NewRow();
+
+                                    // Populate the Row
+                                    dr["Type"] = type;
+                                    dr["Num"] = GetDice(type).getNum;
+                                    dr["Sides"] = GetDice(type).getSides;
+                                    dr["Offset"] = GetDice(type).getOffset;
+
+                                    // Add the Row to the DataSet
+                                    ds.Tables["Values"].Rows.Add(dr);
+                                    count += 1;
+                                }
+                                else
+                                {
+                                    countNoDice += 1;
                                 }
                             }
                         }
                     }
-                    catch (Exception ex)
+                }
+                catch (Exception ex)
+                {
+                    if (from == null)
                     {
-                        if (from != null)
+                        Console.WriteLine("Error saving values to Dataset: {0}", ex);
+                        Console.WriteLine("Count was {0} when we stopped.", count);
+                    }
+                    else
+                    {
+                        from.SendMessage(33, "Error saving values to Dataset: {0}", ex);
+                        from.SendMessage(777, "Count was {0} when we stopped.", count);
+                    }
+                    save_ok = false;
+                }
+                if (save_ok)
+                {
+                    try
+                    {
+                        ds.WriteXml(fs);
+                    }
+                    catch
+                    {
+                        if (from == null)
                         {
-                            from.SendMessage(33, "Error saving values to Dataset: {0}", ex);
+                            Console.WriteLine("Error writing xml file {0}", filename);
+                            Console.WriteLine("Count was {0} when we stopped.", count);
+                        }
+                        else
+                        {
+                            from.SendMessage(33, "Error writing xml file {0}", filename);
                             from.SendMessage(777, "Count was {0} when we stopped.", count);
                         }
                         save_ok = false;
                     }
-                    if (save_ok)
-                    {
-                        try
-                        {
-                            ds.WriteXml(fs);
-                        }
-                        catch
-                        {
-                            if (from != null)
-                            {
-                                from.SendMessage(33, "Error writing xml file {0}", filename);
-                                from.SendMessage(777, "Count was {0} when we stopped.", count);
-                            }
-                        }
-                    }
                 }
+            }
 
-                try
-                {
-                    // try to close the file
-                    if (fs != null) fs.Close();
-                }
-                catch
-                {
-                }
+            try
+            {
+                // try to close the file
+                if (fs != null) fs.Close();
+            }
+            catch
+            {
+            }
 
-                if (!save_ok && from != null)
+            if (from == null)
+            {
+                if (save_ok)
                 {
-                    from.SendMessage("Unable to complete save operation.");
+                    Console.WriteLine("Save Complete!");
+                    Console.WriteLine("Count should be {0}.", count);
+                    Console.WriteLine("Total Weapon Count is {0}.", countWeapons);
+                    Console.WriteLine("Count of Weapons with no Dice is {0}.", countNoDice);
                 }
-
-                if (save_ok && from != null)
+                else
                 {
-                    from.SendMessage("Save Complete!");
-                    from.SendMessage(777, "Count should be {0}.", count);
-                    from.SendMessage(777, "Weapon Count is {0}.", countWeapons);
-                    from.SendMessage(777, "Count of Weapons with no Dice is {0}.", countNoDice);
+                    Console.WriteLine("Unable to complete save operation.");
                 }
             }
             else
             {
-                e.Mobile.SendMessage("You do not have rights to perform this command.");
+                if (save_ok)
+                {
+                    from.SendMessage("Save Complete!");
+                    from.SendMessage(777, "Count should be {0}.", count);
+                    from.SendMessage(777, "Total Weapon Count is {0}.", countWeapons);
+                    from.SendMessage(777, "Count of Weapons with no Dice is {0}.", countNoDice);
+                }
+                else
+                {
+                    from.SendMessage("Unable to complete save operation.");
+                }
             }
         }
+
+        [Usage("SaveWD <Filename>")]
+        [Description("Saves weapon defaults to the filename supplied.")]
+        private static void SaveDice_OnCommand(CommandEventArgs e)
+        {
+            Mobile from = e.Mobile;
+            if (from == null) return;
+
+            if (from.AccessLevel < AccessLevel.Administrator)
+            {
+                from.SendMessage("You do not have rights to perform this command.");
+            }
+            else
+            {
+                if (e.Arguments.Length >= 1)
+                {
+                    SaveRoutine(from, e.Arguments[0]);
+                }
+                else
+                {
+                    from.SendMessage("Usage:  {0} <Filename>", e.Command);
+                }
+            }
+        }
+
+        private static void SaveWeaponDice(WorldSaveEventArgs e)
+        {
+            if (!AUTO_SAVE_DEFAULTS) return;
+
+            SaveRoutine(null, DEFAULT_DICE_XML);
+		}
 
         public static bool InheritsFrom(Type t, Type baseType)
         {
@@ -233,116 +279,33 @@ namespace Server
             return false;
         }
 
-        private static void SaveWeaponDice(WorldSaveEventArgs e)
+        public static int FindBaseTypes()
         {
-            if (!AUTO_SAVE_DEFAULTS) return;
-			
-			string filename = DEFAULT_DICE_XML;
+            List<Type> weaponTypes = new List<Type>();
+            baseTypes = new List<Type>();
 
-			bool save_ok = true;
-			FileStream fs = null;
+            foreach (Assembly assembly in ScriptCompiler.Assemblies)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (InheritsFrom(type, typeof (BaseWeapon)) &&
+                        !type.IsDefined(typeof (ConstructableAttribute), false))
+                    {
+                        baseTypes.Add(type);
+                    }
+                }
+            }
 
-			try
-			{
-				// Create the FileStream to write with.
-				fs = new FileStream(filename, FileMode.Create);
-			}
-			catch
-			{
-				Console.WriteLine("Error creating file {0}", filename);
-				save_ok = false;
-			}
+            foreach (Type btype in baseTypes)
+            {
+                Console.WriteLine("Found: {0}", btype.Name);
+            }
 
-			int count = 0;
-			int countWeapons = 0;
-			int countNoDice = 0;
+            return baseTypes.Count;
+        }
 
-			// so far so good
-			if (save_ok)
-			{
-				// Create the data set
-				DataSet ds = new DataSet("Weapons");
-
-				try
-				{
-					ds.Tables.Add("Values");
-					ds.Tables["Values"].Columns.Add("Type");
-					ds.Tables["Values"].Columns.Add("Num");
-					ds.Tables["Values"].Columns.Add("Sides");
-					ds.Tables["Values"].Columns.Add("Offset");
-					foreach (Assembly assembly in ScriptCompiler.Assemblies)
-					{
-						foreach (Type type in assembly.GetTypes())
-						{
-							if (!type.Name.Contains("Base") && InheritsFrom(type, typeof (BaseWeapon)))
-							{
-								countWeapons += 1;
-								if (HasDice(type))
-								{
-									DataRow dr = ds.Tables["Values"].NewRow();
-									dr["Type"] = type;
-									dr["Num"] = GetDice(type).getNum;
-									dr["Sides"] = GetDice(type).getSides;
-									dr["Offset"] = GetDice(type).getOffset;
-									ds.Tables["Values"].Rows.Add(dr);
-									count += 1;
-								}
-								else
-								{
-									countNoDice += 1;
-								}
-							}
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine("Error saving values to Dataset: {0}", ex);
-					Console.WriteLine("Count was {0} when we stopped.", count);
-					save_ok = false;
-				}
-				if (save_ok)
-				{
-					try
-					{
-						ds.WriteXml(fs);
-					}
-					catch
-					{
-						Console.WriteLine("Error writing xml file {0}", filename);
-						Console.WriteLine("Count was {0} when we stopped.", count);
-					}
-				}
-			}
-
-			try
-			{
-				// try to close the file
-				if (fs != null) fs.Close();
-			}
-			catch
-			{
-			}
-
-			if (save_ok)
-			{
-				Console.WriteLine("Save Complete!");
-				Console.WriteLine("Count should be {0}.", count);
-				Console.WriteLine("Weapon Count is {0}.", countWeapons);
-				Console.WriteLine("Count of Weapons with no Dice is {0}.", countNoDice);
-			}
-			else
-			{
-				Console.WriteLine("Unable to complete save operation.");
-			}
-		}
-
-        private static void LoadWeaponDice()
+        private static void LoadRoutine(Mobile from, string filename)
         {
-			if (!AUTO_LOAD_DEFAULTS) return;
-			
-            string filename = DEFAULT_DICE_XML;
-
             // Check if the file exists
             if (File.Exists(filename))
             {
@@ -357,7 +320,10 @@ namespace Server
 
                 if (fs == null)
                 {
-                    Console.WriteLine("Unable to open {0} for loading", filename);
+                    if (from != null)
+                    {
+                        from.SendMessage("Unable to open {0} for loading", filename);
+                    }
                     return;
                 }
 
@@ -372,7 +338,10 @@ namespace Server
                 }
                 catch
                 {
-                    Console.WriteLine("Error reading xml file {0}", filename);
+                    if (from != null)
+                    {
+                        from.SendMessage(33, "Error reading xml file {0}", filename);
+                    }
                     fileerror = true;
                 }
                 // close the file
@@ -382,6 +351,8 @@ namespace Server
                 {
                     return;
                 }
+                int count = 0;
+                int errorcount = 0;
 
                 // Check that at least a single table was loaded
                 if (ds.Tables != null && ds.Tables.Count > 0)
@@ -391,117 +362,63 @@ namespace Server
                     {
                         try
                         {
-							string typestring = (string)dr["Type"];
-							Type type = ScriptCompiler.FindTypeByName(typestring);
-							if (type == null) type = ScriptCompiler.FindTypeByFullName(typestring);
-                            dice.Add(new weaponDice(type, Int32.Parse((string)dr["Num"]), Int32.Parse((string)dr["Sides"]),
-                                Int32.Parse((string)dr["Offset"])));
+                            string typestring = (string) dr["Type"];
+                            Type type = ScriptCompiler.FindTypeByName(typestring);
+                            if (type == null) type = ScriptCompiler.FindTypeByFullName(typestring);
+                            dice.Add(new weaponDice(type, Int32.Parse((string) dr["Num"]),
+                                Int32.Parse((string) dr["Sides"]),
+                                Int32.Parse((string) dr["Offset"])));
+                            count++;
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            Console.WriteLine("Error inserting values into List<weaponDice> using dice.Add...{0}", ex);
+                            errorcount++;
                         }
+                    }
+                    if (from == null)
+                    {
+                        Console.WriteLine("Load of weapon dice values Complete!");
+                        Console.WriteLine("Count should be {0}.", count);
+                        Console.WriteLine("Error Count was {0}.", errorcount);
+                    }
+                    else
+                    {
+                        from.SendMessage("Load of weapon dice values Complete!");
+                        from.SendMessage(777, "Count should be {0}.", count);
+                        from.SendMessage(777, "Error Count was {0}.", errorcount);
                     }
                 }
             }
             else
-                Console.WriteLine("File does not exist.");
+            {
+                if (from != null)
+                {
+                    from.SendMessage("File does not exist.");
+                }
+            }
         }
 
         [Usage("LoadWD <Filename>")]
         [Description("Loads weapon defaults as defined in the file supplied.")]
-        public static void Load_OnCommand(CommandEventArgs e)
+        public static void LoadDice_OnCommand(CommandEventArgs e)
         {
             Mobile from = e.Mobile;
-            string filename = "";
-            if (e.Mobile.AccessLevel >= AccessLevel.Administrator)
+            if (from == null) return;
+
+            if (from.AccessLevel < AccessLevel.Administrator)
             {
-                if (e.Arguments.Length >= 1)
-                {
-                    filename = e.Arguments[0];
-                }
-                else
-                {
-                    e.Mobile.SendMessage("Usage:  {0} <Filename>", e.Command);
-                    return;
-                }
-                // Check if the file exists
-                if (File.Exists(filename))
-                {
-                    FileStream fs = null;
-                    try
-                    {
-                        fs = File.Open(filename, FileMode.Open, FileAccess.Read);
-                    }
-                    catch
-                    {
-                    }
-
-                    if (fs == null)
-                    {
-                        if (from != null)
-                        {
-                            from.SendMessage("Unable to open {0} for loading", filename);
-                        }
-                        return;
-                    }
-
-                    // Create the data set
-                    DataSet ds = new DataSet("Weapons");
-
-                    // Read in the file
-                    bool fileerror = false;
-                    try
-                    {
-                        ds.ReadXml(fs);
-                    }
-                    catch
-                    {
-                        if (from != null)
-                        {
-                            from.SendMessage(33, "Error reading xml file {0}", filename);
-                        }
-                        fileerror = true;
-                    }
-                    // close the file
-                    fs.Close();
-
-                    if (fileerror)
-                    {
-                        return;
-                    }
-                    int count = 0;
-
-                    // Check that at least a single table was loaded
-                    if (ds.Tables != null && ds.Tables.Count > 0)
-                    {
-                        dice = new List<weaponDice>();
-                        foreach (DataRow dr in ds.Tables["Values"].Rows)
-                        {
-                            try
-                            {
-								string typestring = (string)dr["Type"];
-								Type type = ScriptCompiler.FindTypeByName(typestring);
-								if (type == null) type = ScriptCompiler.FindTypeByFullName(typestring);
-                                dice.Add(new weaponDice(type, Int32.Parse((string)dr["Num"]), Int32.Parse((string)dr["Sides"]),
-                                    Int32.Parse((string)dr["Offset"])));
-                                count++;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Error inserting values into List<weaponDice> using dice.Add...{0}", ex);
-                            }
-                        }
-                        from.SendMessage("Save Complete!");
-                        from.SendMessage(777, "Count should be {0}.", count);
-                    }
-                }
-                else
-                    e.Mobile.SendMessage("File does not exist.");
+                from.SendMessage("You do not have rights to perform this command.");
             }
             else
             {
-                e.Mobile.SendMessage("You do not have rights to perform this command.");
+                if (e.Arguments.Length >= 1)
+                {
+                    LoadRoutine(from, e.Arguments[0]);
+                }
+                else
+                {
+                    from.SendMessage("Usage:  {0} <Filename>", e.Command);
+                }
             }
         }
     }

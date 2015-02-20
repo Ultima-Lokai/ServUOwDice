@@ -1,266 +1,254 @@
 <Weapons>
   <Values>
-    <Type>Axe</Type>
-    <Num>3</Num>
-    <Sides>10</Sides>
-    <Offset>3</Offset>
+    <Type>Server.Items.VikingSword</Type>
+    <Num>4</Num>
+    <Sides>8</Sides>
+    <Offset>2</Offset>
   </Values>
   <Values>
-    <Type>BattleAxe</Type>
-    <Num>2</Num>
-    <Sides>17</Sides>
-    <Offset>4</Offset>
-  </Values>
-  <Values>
-    <Type>DoubleAxe</Type>
-    <Num>1</Num>
-    <Sides>31</Sides>
-    <Offset>4</Offset>
-  </Values>
-  <Values>
-    <Type>ExecutionersAxe</Type>
-    <Num>3</Num>
-    <Sides>10</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>Hatchet</Type>
-    <Num>1</Num>
-    <Sides>16</Sides>
-    <Offset>1</Offset>
-  </Values>
-  <Values>
-    <Type>LargeBattleAxe</Type>
-    <Num>2</Num>
-    <Sides>17</Sides>
-    <Offset>4</Offset>
-  </Values>
-  <Values>
-    <Type>Pickaxe</Type>
-    <Num>1</Num>
-    <Sides>15</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>TwoHandedAxe</Type>
-    <Num>2</Num>
-    <Sides>18</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>WarAxe</Type>
-    <Num>6</Num>
-    <Sides>4</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>Bow</Type>
+    <Type>Server.Items.Bow</Type>
     <Num>4</Num>
     <Sides>9</Sides>
     <Offset>5</Offset>
   </Values>
   <Values>
-    <Type>Crossbow</Type>
-    <Num>5</Num>
+    <Type>Server.Items.Katana</Type>
+    <Num>3</Num>
     <Sides>8</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>HeavyCrossbow</Type>
-    <Num>5</Num>
-    <Sides>10</Sides>
-    <Offset>6</Offset>
-  </Values>
-  <Values>
-    <Type>ButcherKnife</Type>
-    <Num>2</Num>
-    <Sides>7</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>Cleaver</Type>
-    <Num>1</Num>
-    <Sides>12</Sides>
-    <Offset>1</Offset>
-  </Values>
-  <Values>
-    <Type>Dagger</Type>
-    <Num>3</Num>
-    <Sides>5</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>SkinningKnife</Type>
-    <Num>1</Num>
-    <Sides>10</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>Club</Type>
-    <Num>4</Num>
-    <Sides>5</Sides>
-    <Offset>4</Offset>
-  </Values>
-  <Values>
-    <Type>HammerPick</Type>
-    <Num>3</Num>
-    <Sides>10</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>Mace</Type>
-    <Num>6</Num>
-    <Sides>5</Sides>
     <Offset>2</Offset>
   </Values>
   <Values>
-    <Type>MagicWand</Type>
-    <Num>2</Num>
-    <Sides>3</Sides>
+    <Type>Server.Items.Dagger</Type>
+    <Num>3</Num>
+    <Sides>5</Sides>
     <Offset>0</Offset>
   </Values>
   <Values>
-    <Type>Maul</Type>
-    <Num>5</Num>
-    <Sides>5</Sides>
-    <Offset>5</Offset>
-  </Values>
-  <Values>
-    <Type>SmithHammer</Type>
-    <Num>6</Num>
-    <Sides>3</Sides>
+    <Type>Server.Items.SkinningKnife</Type>
+    <Num>1</Num>
+    <Sides>10</Sides>
     <Offset>0</Offset>
   </Values>
   <Values>
-    <Type>WarHammer</Type>
-    <Num>7</Num>
-    <Sides>5</Sides>
-    <Offset>1</Offset>
-  </Values>
-  <Values>
-    <Type>WarMace</Type>
-    <Num>5</Num>
-    <Sides>5</Sides>
-    <Offset>5</Offset>
-  </Values>
-  <Values>
-    <Type>Bardiche</Type>
-    <Num>2</Num>
-    <Sides>20</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>Halberd</Type>
+    <Type>Server.Items.Halberd</Type>
     <Num>2</Num>
     <Sides>23</Sides>
     <Offset>3</Offset>
   </Values>
   <Values>
-    <Type>TestCustomWeapon</Type>
-    <Num>2</Num>
-    <Sides>4</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>Pitchfork</Type>
-    <Num>4</Num>
-    <Sides>4</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>ShortSpear</Type>
-    <Num>2</Num>
-    <Sides>15</Sides>
-    <Offset>2</Offset>
-  </Values>
-  <Values>
-    <Type>Spear</Type>
-    <Num>2</Num>
-    <Sides>18</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>WarFork</Type>
-    <Num>1</Num>
-    <Sides>29</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>BlackStaff</Type>
-    <Num>5</Num>
-    <Sides>6</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>GnarledStaff</Type>
-    <Num>5</Num>
-    <Sides>5</Sides>
-    <Offset>5</Offset>
-  </Values>
-  <Values>
-    <Type>QuarterStaff</Type>
-    <Num>5</Num>
-    <Sides>5</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>ShepherdsCrook</Type>
-    <Num>3</Num>
-    <Sides>4</Sides>
-    <Offset>0</Offset>
-  </Values>
-  <Values>
-    <Type>Broadsword</Type>
-    <Num>2</Num>
-    <Sides>13</Sides>
-    <Offset>3</Offset>
-  </Values>
-  <Values>
-    <Type>Cutlass</Type>
-    <Num>2</Num>
-    <Sides>12</Sides>
-    <Offset>4</Offset>
-  </Values>
-  <Values>
-    <Type>Katana</Type>
-    <Num>3</Num>
-    <Sides>8</Sides>
-    <Offset>2</Offset>
-  </Values>
-  <Values>
-    <Type>Kryss</Type>
+    <Type>Server.Items.Kryss</Type>
     <Num>1</Num>
     <Sides>26</Sides>
     <Offset>2</Offset>
   </Values>
   <Values>
-    <Type>Longsword</Type>
+    <Type>Server.Items.Bardiche</Type>
+    <Num>2</Num>
+    <Sides>20</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Hatchet</Type>
+    <Num>1</Num>
+    <Sides>16</Sides>
+    <Offset>1</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.WarMace</Type>
+    <Num>5</Num>
+    <Sides>5</Sides>
+    <Offset>5</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Cutlass</Type>
+    <Num>2</Num>
+    <Sides>12</Sides>
+    <Offset>4</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Club</Type>
+    <Num>4</Num>
+    <Sides>5</Sides>
+    <Offset>4</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Cleaver</Type>
+    <Num>1</Num>
+    <Sides>12</Sides>
+    <Offset>1</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.ShortSpear</Type>
+    <Num>2</Num>
+    <Sides>15</Sides>
+    <Offset>2</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.HeavyCrossbow</Type>
+    <Num>5</Num>
+    <Sides>10</Sides>
+    <Offset>6</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.BlackStaff</Type>
+    <Num>5</Num>
+    <Sides>6</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.GnarledStaff</Type>
+    <Num>5</Num>
+    <Sides>5</Sides>
+    <Offset>5</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.QuarterStaff</Type>
+    <Num>5</Num>
+    <Sides>5</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Longsword</Type>
     <Num>2</Num>
     <Sides>15</Sides>
     <Offset>3</Offset>
   </Values>
   <Values>
-    <Type>Longsword</Type>
-    <Num>2</Num>
-    <Sides>15</Sides>
+    <Type>Server.Items.WarFork</Type>
+    <Num>1</Num>
+    <Sides>29</Sides>
     <Offset>3</Offset>
   </Values>
   <Values>
-    <Type>Scimitar</Type>
+    <Type>Server.Items.Pickaxe</Type>
+    <Num>1</Num>
+    <Sides>15</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.BattleAxe</Type>
+    <Num>2</Num>
+    <Sides>17</Sides>
+    <Offset>4</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.DoubleAxe</Type>
+    <Num>1</Num>
+    <Sides>31</Sides>
+    <Offset>4</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Spear</Type>
+    <Num>2</Num>
+    <Sides>18</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Broadsword</Type>
+    <Num>2</Num>
+    <Sides>13</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Maul</Type>
+    <Num>5</Num>
+    <Sides>5</Sides>
+    <Offset>5</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.WarHammer</Type>
+    <Num>7</Num>
+    <Sides>5</Sides>
+    <Offset>1</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.ExecutionersAxe</Type>
+    <Num>3</Num>
+    <Sides>10</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Axe</Type>
+    <Num>3</Num>
+    <Sides>10</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.WarAxe</Type>
+    <Num>6</Num>
+    <Sides>4</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.LargeBattleAxe</Type>
+    <Num>2</Num>
+    <Sides>17</Sides>
+    <Offset>4</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.TwoHandedAxe</Type>
+    <Num>2</Num>
+    <Sides>18</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.ButcherKnife</Type>
+    <Num>2</Num>
+    <Sides>7</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.MagicWand</Type>
+    <Num>2</Num>
+    <Sides>3</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.HammerPick</Type>
+    <Num>3</Num>
+    <Sides>10</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Mace</Type>
+    <Num>6</Num>
+    <Sides>5</Sides>
+    <Offset>2</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Crossbow</Type>
+    <Num>5</Num>
+    <Sides>8</Sides>
+    <Offset>3</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Pitchfork</Type>
+    <Num>4</Num>
+    <Sides>4</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.ShepherdsCrook</Type>
+    <Num>3</Num>
+    <Sides>4</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.Scimitar</Type>
     <Num>2</Num>
     <Sides>14</Sides>
     <Offset>2</Offset>
   </Values>
   <Values>
-    <Type>VikingSword</Type>
-    <Num>4</Num>
-    <Sides>8</Sides>
-    <Offset>2</Offset>
-  </Values>
-  <Values>
-    <Type>Fists</Type>
+    <Type>Server.Items.Fists</Type>
     <Num>1</Num>
     <Sides>8</Sides>
+    <Offset>0</Offset>
+  </Values>
+  <Values>
+    <Type>Server.Items.TestCustomWeapon</Type>
+    <Num>2</Num>
+    <Sides>4</Sides>
     <Offset>0</Offset>
   </Values>
 </Weapons>
