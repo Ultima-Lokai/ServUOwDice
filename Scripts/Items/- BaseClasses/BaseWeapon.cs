@@ -3466,12 +3466,7 @@ namespace Server.Items
 		{
 			base.Serialize(writer);
 
-            writer.Write(12); // version
-
-            // Version 12
-            writer.Write(m_DiceNum);
-            writer.Write(m_DiceSides);
-            writer.Write(m_DiceOffset);
+            writer.Write(11); // version
 
 			// Version 11
 			writer.Write(m_TimesImbued);
@@ -3795,14 +3790,6 @@ namespace Server.Items
 
 			switch (version)
             {
-                case 12:
-                    {
-                        m_DiceNum = reader.ReadInt();
-                        m_DiceSides = reader.ReadInt();
-                        m_DiceOffset = reader.ReadInt();
-
-                        goto case 11;
-                    }
 				case 11:
 					{
 						m_TimesImbued = reader.ReadInt();
@@ -4356,6 +4343,7 @@ namespace Server.Items
             m_MaxDamage = -1;
 
             //DICE-DAMAGE Mod
+			// This is just for error catching. These values are not Serialized.
             m_DiceNum = 0;
             m_DiceSides = 0;
             m_DiceOffset = 0;

@@ -11,6 +11,10 @@ namespace Server
 {
     public class WeaponDiceDefaults
     {
+		private static bool AUTO_LOAD_DEFAULTS = true; // Default dice values are loaded on Server startup.
+		private static bool AUTO_SAVE_DEFAULTS = false; // Default dice values are saved during World Save.
+		private static string DEFAULT_DICE_XML = "Data/weapondice.xml";
+		
         public struct weaponDice
         {
             private Type type;
@@ -49,6 +53,8 @@ namespace Server
             {
                 if (w.getType == type) return w;
             }
+			// This method is meant to return an existing value. It should ALWAYS be called in a Try block so that
+			//    invalid results are blocked.
             Exception ex = new Exception("Error");
             throw (ex);
         }
@@ -79,6 +85,7 @@ namespace Server
             CommandSystem.Register("LoadWD", AccessLevel.Administrator, Load_OnCommand);
             CommandSystem.Register("SaveWD", AccessLevel.Administrator, Save_OnCommand);
             LoadWeaponDice();
+			EventSink.WorldSave += new WorldSaveEventHandler(SaveWeaponDice);
         }
 
         [Usage("SaveWD <Filename>")]
@@ -212,15 +219,6 @@ namespace Server
             }
         }
 
-        /// <summary>
-        /// Extension method to check the entire inheritance hierarchy of a
-        /// type to see whether the given base type is inherited.
-        /// </summary>
-        /// <param name="t">The Type object this method was called on</param>
-        /// <param name="baseType">The base type to look for in the 
-        /// inheritance hierarchy</param>
-        /// <returns>True if baseType is found somewhere in the inheritance 
-        /// hierarchy, false if not</returns>
         public static bool InheritsFrom(Type t, Type baseType)
         {
             Type cur = t.BaseType;
@@ -235,9 +233,115 @@ namespace Server
             return false;
         }
 
+        private static void SaveWeaponDice(WorldSaveEventArgs e)
+        {
+            if (!AUTO_SAVE_DEFAULTS) return;
+			
+			string filename = DEFAULT_DICE_XML;
+
+			bool save_ok = true;
+			FileStream fs = null;
+
+			try
+			{
+				// Create the FileStream to write with.
+				fs = new FileStream(filename, FileMode.Create);
+			}
+			catch
+			{
+				Console.WriteLine("Error creating file {0}", filename);
+				save_ok = false;
+			}
+
+			int count = 0;
+			int countWeapons = 0;
+			int countNoDice = 0;
+
+			// so far so good
+			if (save_ok)
+			{
+				// Create the data set
+				DataSet ds = new DataSet("Weapons");
+
+				try
+				{
+					ds.Tables.Add("Values");
+					ds.Tables["Values"].Columns.Add("Type");
+					ds.Tables["Values"].Columns.Add("Num");
+					ds.Tables["Values"].Columns.Add("Sides");
+					ds.Tables["Values"].Columns.Add("Offset");
+					foreach (Assembly assembly in ScriptCompiler.Assemblies)
+					{
+						foreach (Type type in assembly.GetTypes())
+						{
+							if (!type.Name.Contains("Base") && InheritsFrom(type, typeof (BaseWeapon)))
+							{
+								countWeapons += 1;
+								if (HasDice(type))
+								{
+									DataRow dr = ds.Tables["Values"].NewRow();
+									dr["Type"] = type;
+									dr["Num"] = GetDice(type).getNum;
+									dr["Sides"] = GetDice(type).getSides;
+									dr["Offset"] = GetDice(type).getOffset;
+									ds.Tables["Values"].Rows.Add(dr);
+									count += 1;
+								}
+								else
+								{
+									countNoDice += 1;
+								}
+							}
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Error saving values to Dataset: {0}", ex);
+					Console.WriteLine("Count was {0} when we stopped.", count);
+					save_ok = false;
+				}
+				if (save_ok)
+				{
+					try
+					{
+						ds.WriteXml(fs);
+					}
+					catch
+					{
+						Console.WriteLine("Error writing xml file {0}", filename);
+						Console.WriteLine("Count was {0} when we stopped.", count);
+					}
+				}
+			}
+
+			try
+			{
+				// try to close the file
+				if (fs != null) fs.Close();
+			}
+			catch
+			{
+			}
+
+			if (save_ok)
+			{
+				Console.WriteLine("Save Complete!");
+				Console.WriteLine("Count should be {0}.", count);
+				Console.WriteLine("Weapon Count is {0}.", countWeapons);
+				Console.WriteLine("Count of Weapons with no Dice is {0}.", countNoDice);
+			}
+			else
+			{
+				Console.WriteLine("Unable to complete save operation.");
+			}
+		}
+
         private static void LoadWeaponDice()
         {
-            string filename = "Data/weapondice.xml";
+			if (!AUTO_LOAD_DEFAULTS) return;
+			
+            string filename = DEFAULT_DICE_XML;
 
             // Check if the file exists
             if (File.Exists(filename))
@@ -287,7 +391,10 @@ namespace Server
                     {
                         try
                         {
-                            dice.Add(new weaponDice(ScriptCompiler.FindTypeByName((string)dr["Type"]), Int32.Parse((string)dr["Num"]), Int32.Parse((string)dr["Sides"]),
+							string typestring = (string)dr["Type"];
+							Type type = ScriptCompiler.FindTypeByName(typestring);
+							if (type == null) type = ScriptCompiler.FindTypeByFullName(typestring);
+                            dice.Add(new weaponDice(type, Int32.Parse((string)dr["Num"]), Int32.Parse((string)dr["Sides"]),
                                 Int32.Parse((string)dr["Offset"])));
                         }
                         catch (Exception ex)
@@ -373,7 +480,10 @@ namespace Server
                         {
                             try
                             {
-                                dice.Add(new weaponDice(ScriptCompiler.FindTypeByName((string)dr["Type"]), Int32.Parse((string)dr["Num"]), Int32.Parse((string)dr["Sides"]),
+								string typestring = (string)dr["Type"];
+								Type type = ScriptCompiler.FindTypeByName(typestring);
+								if (type == null) type = ScriptCompiler.FindTypeByFullName(typestring);
+                                dice.Add(new weaponDice(type, Int32.Parse((string)dr["Num"]), Int32.Parse((string)dr["Sides"]),
                                     Int32.Parse((string)dr["Offset"])));
                                 count++;
                             }
