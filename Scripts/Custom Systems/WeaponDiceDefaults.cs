@@ -14,6 +14,7 @@ namespace Server
 		private static bool AUTO_LOAD_DEFAULTS = true; // Default dice values are loaded on Server startup.
 		private static bool AUTO_SAVE_DEFAULTS = true; // Default dice values are saved during World Save.
 		private static string DEFAULT_DICE_XML = "Data/weapondice.xml";
+        private static AccessLevel DEFAULT_ACCESS_LEVEL = AccessLevel.Administrator;
 		
         public struct weaponDice
         {
@@ -84,8 +85,8 @@ namespace Server
 
         public static void Initialize()
         {
-            CommandSystem.Register("LoadWD", AccessLevel.Administrator, LoadDice_OnCommand);
-            CommandSystem.Register("SaveWD", AccessLevel.Administrator, SaveDice_OnCommand);
+            CommandSystem.Register("LoadWD", DEFAULT_ACCESS_LEVEL, LoadDice_OnCommand);
+            CommandSystem.Register("SaveWD", DEFAULT_ACCESS_LEVEL, SaveDice_OnCommand);
             Console.WriteLine("Found {0} Base Types.", FindBaseTypes());
             if (AUTO_LOAD_DEFAULTS) LoadRoutine(null, DEFAULT_DICE_XML);
 			EventSink.WorldSave += new WorldSaveEventHandler(SaveWeaponDice);
@@ -132,7 +133,7 @@ namespace Server
                         foreach (Type type in assembly.GetTypes())
                         {
                             // We do not save 'Base' types like BaseKnife, etc. but we save anything else that inherits from BaseWeapon
-                            if (!type.Name.Contains("Base") && InheritsFrom(type, typeof(BaseWeapon)))
+                            if (InheritsFrom(type, typeof(BaseWeapon)) && !baseTypes.Contains(type))
                             {
                                 countWeapons += 1;
                                 if (HasDice(type))
@@ -241,7 +242,7 @@ namespace Server
             Mobile from = e.Mobile;
             if (from == null) return;
 
-            if (from.AccessLevel < AccessLevel.Administrator)
+            if (from.AccessLevel < DEFAULT_ACCESS_LEVEL)
             {
                 from.SendMessage("You do not have rights to perform this command.");
             }
@@ -260,9 +261,7 @@ namespace Server
 
         private static void SaveWeaponDice(WorldSaveEventArgs e)
         {
-            if (!AUTO_SAVE_DEFAULTS) return;
-
-            SaveRoutine(null, DEFAULT_DICE_XML);
+            if (AUTO_SAVE_DEFAULTS) SaveRoutine(null, DEFAULT_DICE_XML);
 		}
 
         public static bool InheritsFrom(Type t, Type baseType)
@@ -281,24 +280,20 @@ namespace Server
 
         public static int FindBaseTypes()
         {
-            List<Type> weaponTypes = new List<Type>();
             baseTypes = new List<Type>();
+            ConstructorInfo ctor;
 
             foreach (Assembly assembly in ScriptCompiler.Assemblies)
             {
                 foreach (Type type in assembly.GetTypes())
                 {
-                    if (InheritsFrom(type, typeof (BaseWeapon)) &&
-                        !type.IsDefined(typeof (ConstructableAttribute), false))
+                    if (InheritsFrom(type, typeof(BaseWeapon)))
                     {
-                        baseTypes.Add(type);
+                        ctor = type.GetConstructor(Type.EmptyTypes);
+                        if (ctor == null)
+                            baseTypes.Add(type);
                     }
                 }
-            }
-
-            foreach (Type btype in baseTypes)
-            {
-                Console.WriteLine("Found: {0}", btype.Name);
             }
 
             return baseTypes.Count;
@@ -391,9 +386,13 @@ namespace Server
             }
             else
             {
-                if (from != null)
+                if (from == null)
                 {
-                    from.SendMessage("File does not exist.");
+                    Console.WriteLine("Weapon Dice default file does not exist: {0}", filename);
+                }
+                else
+                {
+                    from.SendMessage("File does not exist: {0}", filename);
                 }
             }
         }
@@ -405,7 +404,7 @@ namespace Server
             Mobile from = e.Mobile;
             if (from == null) return;
 
-            if (from.AccessLevel < AccessLevel.Administrator)
+            if (from.AccessLevel < DEFAULT_ACCESS_LEVEL)
             {
                 from.SendMessage("You do not have rights to perform this command.");
             }

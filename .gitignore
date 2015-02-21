@@ -41,3 +41,19 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+Backups/Automatic/Most Recent (21-2-2015 12-12-54)/Accounts/accounts.xml
+*.bin
+Backups/Automatic/Most Recent (21-2-2015 12-12-54)/Attachments/Attachments.fpi
+*.ima
+*.idx
+*.tdb
+*.fpi
+*.cache
+Backups/Automatic/Most Recent (21-2-2015 12-12-54)/Staff Runebook/Rune Accounts.xml
+Backups/Automatic/Most Recent (21-2-2015 12-28-21)/Accounts/accounts.xml
+Backups/Automatic/Most Recent (21-2-2015 12-28-21)/Staff Runebook/Rune Accounts.xml
+Backups/Automatic/Second Backup (21-2-2015 12-10-12)/Accounts/accounts.xml
+*.log
+Backups/Automatic/Second Backup (21-2-2015 12-10-12)/Staff Runebook/Rune Accounts.xml
+*.cache
+EmergencyBackup/obj/x86/Release/DesignTimeResolveAssemblyReferencesInput.cache
